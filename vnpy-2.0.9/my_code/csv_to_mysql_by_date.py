@@ -15,7 +15,7 @@ class Csv_into_mysql():
                             password='zlb198838',
                             database='stock_date_db',
                             charset='utf8')
-        self.cs_1 = self.conn.cursor()
+        self.cs = self.conn.cursor()
 
         self.stock_code_list = []
         self.filename_dir_list = []
@@ -27,6 +27,7 @@ class Csv_into_mysql():
 
         self.sql_tuple = []
         self.row = 0
+        self.insert_date = None
 
     def get_filename(self, path: str):
         """
@@ -52,7 +53,7 @@ class Csv_into_mysql():
         """
         断开mysql连接
         """
-        self.cs_1.close()
+        self.cs.close()
         self.conn.close()
 
     def createTable(self, date: str):
@@ -65,7 +66,7 @@ class Csv_into_mysql():
         :return:
         """
         sql_db = f"select table_name from information_schema.tables where table_name = '{date}';"
-        if self.cs_1.execute(sql_db) == 0:
+        if self.cs.execute(sql_db) == 0:
             try:
                 sql = f"create table if not exists `{date}`(\
                     id int unsigned primary key not null auto_increment,\
@@ -79,7 +80,7 @@ class Csv_into_mysql():
                     index(stock_code)\
                 );"
 
-                self.cs_1.execute(sql)
+                self.cs.execute(sql)
                 # self.conn.commit()
                 print('create table ok!')
             except Exception as e:
@@ -119,7 +120,14 @@ class Csv_into_mysql():
             print(e)
             return
         df_all['ts_code'] = df_all['ts_code'].map(lambda x: x.split('.')[0])
-
+        
+        df_all['datetime_T'] = pd.to_datetime(df_all.trade_date, format='%Y%m%d')
+        print(df_all.head(5))
+        print(self.insert_date)
+        self.insert_date=pd.Timestamp(self.insert_date)
+        df_all = df_all[df_all['datetime_T'] >= self.insert_date]
+        df_all.drop(['datetime_T'], axis=1,inplace=True)
+        print(df_all.head(5))
         df_all.rename(columns={
             "trade_date": "datetime",
             "vol": "volume",
@@ -148,19 +156,43 @@ class Csv_into_mysql():
         self.sql_tuple = [tuple(i) for i in df_all.itertuples()]
         df_all['id'] = 0
         df_all.set_index('id', inplace=True)
- 
-
+        
         return self.date_table, self.sql_tuple
     
-    def record_insert_date(self):
+    def record_insert_date(self, stock: str, date):
+        """ 
+        记录每个股票插入数据的截止日期
+        """
+        try:
+            sql_1 = f"select * from stock_insert_date_record where stock_code={stock};"
+            if self.cs.execute(sql_1) == 0:
+                sql_2 = f"insert into 'stock_insert_date_record' (stock_code,datetime) values ({stock},{date});"
+                self.cs.execute(sql_2)  
+            else:
+                sql_3 = f"update datetime={date} where stock_code={stock};"
+                self.cs.execute(sql_3)
+            self.cs.commit()
+        except Exception as e:
+            print(e)
 
+    def find_insert_date(self, stock: str):
+        """ 
+        查找股票插入的起始日期
+        """
+        sql_1=f"select datetime from stock_insert_date_record where stock_code={stock};"
+        if self.cs.execute(sql_1) == 0:
+            self.insert_date=datetime(1990,1,1)
+            return self.insert_date
+        else:
+            self.insert_date = self.cs.fetchone()[0] + timedelta(days=1)
+            return self.insert_date
 
     def myInsert(self, date: list, sql_tuple: list):
         '''
         数据库插入
         :param newList: 传入的列表数据
         批量添加数据，！！！！！数据格式必须list[tuple(),tuple(),tuple()]
-        :return:
+        :return:            
         '''
         try:
             # 单个股票对日期进行存储
@@ -171,9 +203,11 @@ class Csv_into_mysql():
                 sql = f"insert into `{date[self.row]}`\
                     (id,stock_code,open_price,high_price,low_price,close_price,volume,amount)\
                     values(%s,%s,%s,%s,%s,%s,%s,%s);"
-                self.cs_1.execute(sql,sql_tuple[self.row])  # 执行插入数据
+                self.cs.execute(sql,sql_tuple[self.row])  # 执行插入数据
                 self.row += 1
+            self.row = 0
             self.conn.commit()
+            self.record_insert_date(self.stock_code,date[-1])
         except Exception as e:
             print(e)
 
@@ -192,10 +226,12 @@ class Csv_into_mysql():
 
         while self.ix < n:
             # 循环插入csv文件
+            # self.record_insert_date('000004',"20200403")
             self.stock_code = self.stock_code_list[self.ix][:-3]
-            self.createTable(self.stock_code)
+            # self.createTable(self.stock_code)
             self.print_info('starting insert')
-            self.myList(path)
+            self.find_insert_date(self.stock_code)
+            self.myList(self.filename_dir_list)
             self.myInsert(self.date_table, self.sql_tuple)
             self.print_info('insert ok.\n')
             self.ix += 1
@@ -208,7 +244,6 @@ def main():
     path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
     csv_to_sql.Insert_all_file(path)
     csv_to_sql.close_conn()
-
 
 if __name__ == '__main__':
     main()
