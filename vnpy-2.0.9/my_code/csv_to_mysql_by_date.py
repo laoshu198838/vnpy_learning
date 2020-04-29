@@ -164,9 +164,9 @@ class Csv_into_mysql():
         记录每个股票插入数据的截止日期
         """
         try:
-            sql_1 = f"select * from stock_insert_date_record where stock_code={stock};"
+            sql_1 = f"select * from stock_insert_date_record where stock_code=`{stock}`;"
             if self.cs.execute(sql_1) == 0:
-                sql_2 = f"insert into 'stock_insert_date_record' (stock_code,datetime) values ({stock},{date});"
+                sql_2 = f"insert into stock_insert_date_record (stock_code,datetime) values (`{stock}`,{date});"
                 self.cs.execute(sql_2)  
             else:
                 sql_3 = f"update datetime={date} where stock_code={stock};"
@@ -226,7 +226,7 @@ class Csv_into_mysql():
 
         while self.ix < n:
             # 循环插入csv文件
-            # self.record_insert_date('000004',"20200403")
+            self.record_insert_date('000004',"2020-04-03")
             self.stock_code = self.stock_code_list[self.ix][:-3]
             # self.createTable(self.stock_code)
             self.print_info('starting insert')
