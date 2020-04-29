@@ -55,20 +55,27 @@ conn = connect(
     port=3306,
     user='root',
     password='zlb198838',
-    database='stock_code_db',
+    database='stock_date_db',
     charset='utf8'
 )
 cs_1 = conn.cursor()
-return_1 = cs_1.execute('select * from information_schema.schemata where schema_name="test_1"')
-print(return_1==0)
+return_1 = cs_1.execute('select datetime from stock_insert_date_record where stock_code="000001";')
+conn.rollback()
+up_time = cs_1.fetchone()[0] + timedelta(days=1)
+print(up_time)
 df_all = pd.read_csv(
             r'C:\Users\Administrator\Desktop\000001.csv',
             # parse_dates=["trade_date"],
             usecols=[2, 3, 4, 5, 6, 10, 11],
             # index_col=0
         )
-print(df_all.head(2))
-print(df_all.dtypes)
+print(df_all['trade_date'][0])
+df_all['datetime_T'] = pd.to_datetime(df_all.trade_date, format='%Y%m%d')
+print(df_all)
+up_time=pd.Timestamp(up_time)
+df_all = df_all[df_all['datetime_T'] >= up_time]
+df_all.drop(['datetime_T'],axis=1,inplace=True)
+print(df_all)
 # df_all['datetime'] = df_all.trade_date
 df_all.set_index('trade_date', inplace=True, drop=False)
 df_all.trade_date = pd.to_datetime(df_all.trade_date, format='%Y%m%d')
