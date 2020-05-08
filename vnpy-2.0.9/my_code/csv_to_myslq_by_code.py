@@ -154,6 +154,7 @@ class Csv_into_mysql():
 
         # df转化为[(),()]
         self.my_list = [tuple(i) for i in df_part.itertuples()]
+        print(df.dtypes)
         print(self.my_list[0])
         return self.my_list
 

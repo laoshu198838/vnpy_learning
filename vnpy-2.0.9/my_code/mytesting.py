@@ -59,22 +59,35 @@ conn = connect(
     charset='utf8'
 )
 cs_1 = conn.cursor()
-return_1 = cs_1.execute('select datetime from stock_insert_date_record where stock_code="000001";')
-conn.rollback()
-up_time = cs_1.fetchone()[0] + timedelta(days=1)
-print(up_time)
+
+
+def record_insert_date(self, stock: str, date):
+    """ 
+    记录每个股票插入数据的截止日期
+    """
+    try:
+        sql_1 = f"select * from stock_insert_date_record where stock_code=`{stock}`;"
+        if self.cs.execute(sql_1) == 0:
+            sql_2 = f"insert into stock_insert_date_record (stock_code,datetime) values (`{stock}`,{date});"
+            self.cs.execute(sql_2)
+        else:
+            sql_3 = f"update datetime={date} where stock_code={stock};"
+            self.cs.execute(sql_3)
+        self.cs.commit()
+    except Exception as e:
+        print(e)
+
+
 df_all = pd.read_csv(
-            r'C:\Users\Administrator\Desktop\000001.csv',
-            # parse_dates=["trade_date"],
-            usecols=[2, 3, 4, 5, 6, 10, 11],
-            # index_col=0
-        )
+    r'C:\Users\Administrator\Desktop\000001.csv',
+    # parse_dates=["trade_date"],
+    usecols=[2, 3, 4, 5, 6, 10, 11],
+    # index_col=0
+)
 print(df_all['trade_date'][0])
 df_all['datetime_T'] = pd.to_datetime(df_all.trade_date, format='%Y%m%d')
-print(df_all)
-up_time=pd.Timestamp(up_time)
-df_all = df_all[df_all['datetime_T'] >= up_time]
-df_all.drop(['datetime_T'],axis=1,inplace=True)
+
+df_all.drop(['datetime_T'], axis=1, inplace=True)
 print(df_all)
 # df_all['datetime'] = df_all.trade_date
 df_all.set_index('trade_date', inplace=True, drop=False)
@@ -86,14 +99,20 @@ print(my_list[0])
 # for row in df_all.itertuples():
 
 #     my_list.append(tuple(row))
-
+# delete from bj where data_info in
+#  (select data_info from
+#  ( select data_info from bj group by data_info having count(data_info)>1) a)
+# and id not in
+# ( select min(id) from
+# (select min(id) as id from bj group by data_info having count(data_info)>1 ) b)
 sql = "insert into `000002` \
     (datetime, open_price, high_price, low_price, close_price, volume, amount) \
     values(%s, %s, %s, %s, %s, %s, %s) "
 
-cs_1.executemany(sql, my_list)
+# cs_1.executemany(sql, my_list)
 conn.rollback()
 conn.commit()
+
 
 class JD():
     def __init__(self):
@@ -105,7 +124,7 @@ class JD():
             charset='utf8'
         )
         self.cs_1 = self.conn.cursor()
-    
+
     def close_conn(self):
         """ 关闭连接 """
         self.cs_1.close()
@@ -117,22 +136,22 @@ class JD():
         self.cs_1.execute(sql)
         for info in self.cs_1.fetchall():
             print(info)
-    
+
     def query_all_goods(self):
         """ 查询所有商品 """
-        sql='select * from goods;'
+        sql = 'select * from goods;'
         self.execute_sql(sql)
-    
+
     def query_all_cates(self):
         """ 查询所有商品类别 """
-        sql='select name from goods_cates;'
+        sql = 'select name from goods_cates;'
         self.execute_sql(sql)
-    
+
     def query_all_brands(self):
         """ 查询所有品牌 """
-        sql='select name from goods_brands;'
+        sql = 'select name from goods_brands;'
         self.execute_sql(sql)
-    
+
     @staticmethod
     def print_info():
         """ 打印输入信息 """
@@ -142,8 +161,8 @@ class JD():
         print('1:查询所有商品信息')
         print('2:查询所有类别')
         print('3:查询所有品牌')
-        return input('请输入查询信息（数字）：')  
-    
+        return input('请输入查询信息（数字）：')
+
     def run(self):
         """ 运行查询 """
         while True:
@@ -152,18 +171,19 @@ class JD():
                 self.close_conn()
                 break
             elif num == '1':
-                self.query_all_goods()   
+                self.query_all_goods()
             elif num == '2':
                 self.query_all_cates()
             elif num == '3':
                 self.query_all_brands()
             else:
                 print('输入错误！！请输入正确数字！')
-    
-            
+
+
 def main():
     jd = JD()
     jd.run()
+
 
 if __name__ == "__main__":
     main()

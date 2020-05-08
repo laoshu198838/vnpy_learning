@@ -28,7 +28,8 @@ class Csv_into_mysql():
         self.sql_tuple = []
         self.row = 0
         self.insert_date = None
-
+        self.update_date = None
+        
     def get_filename(self, path: str):
         """
         遍历整个文件夹，获取所有的回测文件地址和文件名称列表
@@ -164,14 +165,18 @@ class Csv_into_mysql():
         记录每个股票插入数据的截止日期
         """
         try:
-            sql_1 = f"select * from stock_insert_date_record where stock_code=`{stock}`;"
-            if self.cs.execute(sql_1) == 0:
-                sql_2 = f"insert into stock_insert_date_record (stock_code,datetime) values (`{stock}`,{date});"
-                self.cs.execute(sql_2)  
+            sql_1 =f"select count(*) from stock_insert_date_record where stock_code={stock};"
+            self.cs.execute(sql_1)
+            count =self.cs.fetchone()[0]
+            if count == 0:
+                sql_tuple = (stock, date)
+                sql_2 = f"insert into stock_insert_date_record (stock_code,expiration_date) values (%s,%s);"
+                self.cs.execute(sql_2,sql_tuple)  
             else:
-                sql_3 = f"update datetime={date} where stock_code={stock};"
+                
+                sql_3 = f"update stock_insert_date_record set expiration_date={date} where stock_code={stock};"
                 self.cs.execute(sql_3)
-            self.cs.commit()
+            self.conn.commit()
         except Exception as e:
             print(e)
 
@@ -179,7 +184,7 @@ class Csv_into_mysql():
         """ 
         查找股票插入的起始日期
         """
-        sql_1=f"select datetime from stock_insert_date_record where stock_code={stock};"
+        sql_1=f"select expiration_date from stock_insert_date_record where stock_code={stock};"
         if self.cs.execute(sql_1) == 0:
             self.insert_date=datetime(1990,1,1)
             return self.insert_date
@@ -205,6 +210,8 @@ class Csv_into_mysql():
                     values(%s,%s,%s,%s,%s,%s,%s,%s);"
                 self.cs.execute(sql,sql_tuple[self.row])  # 执行插入数据
                 self.row += 1
+            self.update_date = date[-1]
+            self.record_insert_date(self.stock,self.update_date)
             self.row = 0
             self.conn.commit()
             self.record_insert_date(self.stock_code,date[-1])
@@ -226,9 +233,8 @@ class Csv_into_mysql():
 
         while self.ix < n:
             # 循环插入csv文件
-            self.record_insert_date('000004',"2020-04-03")
             self.stock_code = self.stock_code_list[self.ix][:-3]
-            # self.createTable(self.stock_code)
+            # self.stock = str(self.stock_code)
             self.print_info('starting insert')
             self.find_insert_date(self.stock_code)
             self.myList(self.filename_dir_list)
