@@ -45,6 +45,27 @@ from datetime import datetime
 import sys
 # client = MongoClient(host='localhost', port=27017)
 # path = Path(r"C:\Users\Administrator\Desktop\1")
+import collections
+l = ['a', 'b', 'c']
+dq = collections.deque(l)
+
+from typing import List, Tuple, Dict
+
+from collections import namedtuple
+City=namedtuple('city','name country population coordinates')
+tokyo=City('Tokyo','JP','36.933',(35.689722,139.691667))
+print(tokyo.name)
+print(tokyo.country)
+tuple_1 = ((3, 4), (2,1))
+tuple_1 = [i for j in tuple_1 for i in j]
+print(tuple_1)
+def test(a:int, s:str, f:float, b:bool) -> Tuple[int, Tuple, Dict, bool]:
+    l = a
+    tup = tuple(s)
+    di = {'key': f}
+    bo = b
+    return l, tup, di, bo
+print(test(12, 'test', 1.00, 1))
 
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QIcon
@@ -98,13 +119,7 @@ my_list = [tuple(i) for i in df_all.itertuples()]
 print(my_list[0])
 # for row in df_all.itertuples():
 
-#     my_list.append(tuple(row))
-# delete from bj where data_info in
-#  (select data_info from
-#  ( select data_info from bj group by data_info having count(data_info)>1) a)
-# and id not in
-# ( select min(id) from
-# (select min(id) as id from bj group by data_info having count(data_info)>1 ) b)
+
 sql = "insert into `000002` \
     (datetime, open_price, high_price, low_price, close_price, volume, amount) \
     values(%s, %s, %s, %s, %s, %s, %s) "
