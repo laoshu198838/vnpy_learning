@@ -28,18 +28,23 @@ def init(driver: Driver, settings: dict):
         Driver.POSTGRESQL: init_postgresql,
     }
     assert driver in init_funcs
-    # print(assert driver in init_funcs)
 
     db = init_funcs[driver](settings)
     bar, tick = init_models(db, driver)
     return SqlManager(bar, tick)
 
+# 根据driver类型选择数据库初始化函数
+
 
 def init_sqlite(settings: dict):
+    """ 
+    在init中调用peewee的Database Engine（SQLiteDatabase）生成实例，表示与数据库文件建立连接，将该实例对象称为db。
+    """
     database = settings["database"]
     path = str(get_file_path(database))
     db = SqliteDatabase(path)
     return db
+    # 这个setting保存在哪个地方
 
 
 def init_mysql(settings: dict):
@@ -64,13 +69,18 @@ class ModelBase(Model):
 
 
 def init_models(db: Database, driver: Driver):
+    """ 
+    定义数据库表形式，与db连接，并返回两张表。
+    利用peewee数据库引擎生成数据库连接对象db
+    调用init_models函数生成model类同时将model类添加到db中，然后将两张表返回（DbTickData和DbBarData）。
+    """
     class DbBarData(ModelBase):
         """
         Candlestick bar data for database storage.
 
         Index is defined unique with datetime, interval, symbol
         """
-
+        
         id = AutoField()
         symbol: str = CharField()
         exchange: str = CharField()
@@ -328,6 +338,12 @@ def init_models(db: Database, driver: Driver):
 
 
 class SqlManager(BaseDatabaseManager):
+    """ 
+    将两张数据库tables放入SqlManager
+    db：数据库连接对象
+    driver：Diver枚举类对象。
+    最后，将这两张表（类）添加到SqlManager中，生成统一的DatabaseManager，并提供给外界调用。
+    """
 
     def __init__(self, class_bar: Type[Model], class_tick: Type[Model]):
         self.class_bar = class_bar
