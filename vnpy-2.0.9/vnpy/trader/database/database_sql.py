@@ -28,6 +28,7 @@ def init(driver: Driver, settings: dict):
         Driver.POSTGRESQL: init_postgresql,
     }
     assert driver in init_funcs
+    # print(assert driver in init_funcs)
 
     db = init_funcs[driver](settings)
     bar, tick = init_models(db, driver)
@@ -42,6 +43,7 @@ def init_sqlite(settings: dict):
 
 
 def init_mysql(settings: dict):
+    """ 用于连接mysql """
     keys = {"database", "user", "password", "host", "port"}
     settings = {k: v for k, v in settings.items() if k in keys}
     db = MySQLDatabase(**settings)
@@ -317,7 +319,8 @@ def init_models(db: Database, driver: Driver):
                         ).execute()
                 else:
                     for c in chunked(dicts, 50):
-                        DbTickData.insert_many(c).on_conflict_replace().execute()
+                        DbTickData.insert_many(
+                            c).on_conflict_replace().execute()
 
     db.connect()
     db.create_tables([DbBarData, DbTickData])
@@ -413,3 +416,7 @@ class SqlManager(BaseDatabaseManager):
     def clean(self, symbol: str):
         self.class_bar.delete().where(self.class_bar.symbol == symbol).execute()
         self.class_tick.delete().where(self.class_tick.symbol == symbol).execute()
+
+
+if __name__ == "__main__":
+    init(mysql, {})

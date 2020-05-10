@@ -83,3 +83,6 @@ class BaseDatabaseManager(ABC):
         delete all records for a symbol
         """
         pass
+
+if __name__ == "__main__":
+   init(mysql,{}) 

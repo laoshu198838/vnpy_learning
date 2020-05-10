@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
-import os
 import numpy as np
 import pandas as pd
 import time
 from pymysql import connect
-from collections import defaultdict
 
 
 class Mysql_load_data():
