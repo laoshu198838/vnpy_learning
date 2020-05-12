@@ -4,6 +4,7 @@ from .database import BaseDatabaseManager, Driver
 
 def init(settings: dict) -> BaseDatabaseManager:
     driver = Driver(settings["driver"])
+    # 这个地方传入driver，用来区分启动的是哪个数据库
     if driver is Driver.MONGODB:
         return init_nosql(driver=driver, settings=settings)
     else:

@@ -349,7 +349,7 @@ class SqlManager(BaseDatabaseManager):
         # 传入的是实例化的model
         self.class_bar = class_bar
         self.class_tick = class_tick
-
+    # 他是怎么就能够被调用了呢
     def load_bar_data(
         self,
         symbol: str,

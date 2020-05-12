@@ -18,7 +18,7 @@ class Csv_into_mysql():
             database='stock_code_db',
             charset='utf8'
         )
-        self.cs_1 = self.conn.cursor()
+        self.cs = self.conn.cursor()
 
         self.stock_code_list = []
         self.filename_dir_list = []
@@ -51,7 +51,7 @@ class Csv_into_mysql():
         """
         断开mysql连接
         """
-        self.cs_1.close()
+        self.cs.close()
         self.conn.close()
 
     def createTable(self, stock_code:str):
@@ -64,7 +64,7 @@ class Csv_into_mysql():
         :return:
         """
         sql_db =f"select table_name from information_schema.tables where table_name = '{self.stock_code}';"
-        if self.cs_1.execute(sql_db) == 0:
+        if self.cs.execute(sql_db) == 0:
             try:
                 sql = f"create table if not exists `{self.stock_code}`(\
                     id int unsigned primary key not null auto_increment,\
@@ -77,7 +77,7 @@ class Csv_into_mysql():
                     amount decimal(30, 10) default 0,\
                     index(datetime)\
                 );"
-                self.cs_1.execute(sql)
+                self.cs.execute(sql)
                 self.conn.commit()
                 print('create table ok!')
             except Exception as e:
@@ -133,8 +133,8 @@ class Csv_into_mysql():
         df_all.sort_values(by=['datetime'], ascending=True, inplace=True)
 
         # 获取mysql中已有数据的截止日期
-        self.cs_1.execute(f"select max(datetime) from `{self.stock_code}`;")
-        rows = self.cs_1.fetchone()[0]
+        self.cs.execute(f"select max(datetime) from `{self.stock_code}`;")
+        rows = self.cs.fetchone()[0]
         try:
             last_date = pd.Timestamp(rows + timedelta(hours=24))
         except:
@@ -170,7 +170,7 @@ class Csv_into_mysql():
             sql = f"insert into `{self.stock_code}`\
                 (datetime,open_price,high_price,low_price,close_price,volume,amount)\
                     values(%s,%s,%s,%s,%s,%s,%s)"
-            self.cs_1.executemany(sql, newList)  # 执行插入数据
+            self.cs.executemany(sql, newList)  # 执行插入数据
             self.conn.commit()
 
         except Exception as e:
@@ -199,15 +199,42 @@ class Csv_into_mysql():
             self.print_info('insert ok.\n')
             self.ix += 1
 
+    def add_field(self):
+        """
+        field=['id','symbol','exchange','datetime','interval','volume','open_interest','open_price','high_price','close_price']
+        """
+        field={'id','symbol','exchange','datetime','interval','volume','open_interest','open_price','high_price','close_price'}
+        sql = f"select COLUMN_NAME from INFORMATION_SCHEMA.Columns where table_name='000001';"
+        self.cs.execute(sql)
+        table_field = self.cs.fetchall()
+        
+        table_field = {x for y in table_field for x in y}
+        add_field=field-table_field
+        
+        sql_1 = "show tables;"
+        self.cs.execute(sql_1)
+        table = self.cs.fetchall()
+        table = [x for y in table for x in y]
+        print(table[0:5])
+
+        for i in range(len(table)):
+            sql_2 = f"alter table `{table[i]}` add ( 
+                'symbol' varchar(6) not null,
+                'exchange' varchar(4) not null,
+                'open_interest' decimal(4,2) default 0,
+                'interval' varchar(2) not null);"
+            self.cs.execute(sql_2)
+            self.conn.commit()
+
 
 def main():
     # 创建数据表
     csv_to_sql = Csv_into_mysql()
     # 选择要插入的数据的文件夹地址
     path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
-    csv_to_sql.Insert_all_file(path)
-    csv_to_sql.close_conn()
-
+    # csv_to_sql.Insert_all_file(path)
+    # csv_to_sql.close_conn()
+    csv_to_sql.add_field()
 
 if __name__ == '__main__':
     main()

@@ -69,7 +69,7 @@ class Csv_into_mysql():
             (id int primary key not null auto_increment,name varchar(30));"
         :return:
         """
-        sql_db = f"select table_name from information_schema.tables where table_name = '{date}';"
+        sql_db = f"select table_name from info_1rmation_schema.tables where table_name = '{date}';"
         if self.cs.execute(sql_db) == 0:
             try:
                 sql = f"create table if not exists `{date}`(\
@@ -139,9 +139,10 @@ class Csv_into_mysql():
             df_all.datetime, format='%Y%m%d')
         
         # 筛选出需要插入的数据
+        # print(df_all.head(-5))
         df_all = df_all[df_all['datetime_Temp'] >= self.insert_date]
         df_all.drop(['datetime_Temp'], axis=1, inplace=True)
-
+        # print(df_all.head(5))
         # 判断存入数据是否为空，跳出本次循环。
         if len(df_all) == 0:
             print(self.stock_code + ' has no new data to insert!.')
@@ -149,6 +150,7 @@ class Csv_into_mysql():
 
         # 利用datetime得到股票每个交易日的日期，用于生成日期表名
         df_all.sort_values(by=['datetime'], ascending=True, inplace=True)
+        # print(df_all)
         self.date_table = df_all['datetime'].values.tolist()
         df_all = df_all.drop('datetime', axis=1)
 
@@ -158,7 +160,8 @@ class Csv_into_mysql():
 
         # df转化为[(),()]
         self.sql_tuple = [tuple(i) for i in df_all.itertuples()]
-      
+        # print(self.date_table[0:5])
+        # print(self.sql_tuple[0:5])
         return self.date_table, self.sql_tuple
 
     def record_insert_date(self, stock: str, date: str):
@@ -191,6 +194,7 @@ class Csv_into_mysql():
             self.insert_date = self.cs.fetchone()[0] + timedelta(days=1)
         self.insert_date = pd.Timestamp(self.insert_date)
         return self.insert_date
+        return 
 
     def myInsert(self, date: list, sql_tuple: list):
         '''
@@ -221,11 +225,11 @@ class Csv_into_mysql():
         except Exception as e:
             print(e)
 
-    def print_info(self, info: str):
+    def print_info_1(self, info_1: str):
         """ 打印过程信息 """
         n = len(self.filename_dir_list)
         print(str(self.ix + 1), '/',
-              str(n) + ':(' + self.stock_code + ') ' + info)
+              str(n) + ':(' + self.stock_code + ') ' + info_1)
 
     def Insert_all_file(self, path: str):
         """
@@ -236,12 +240,13 @@ class Csv_into_mysql():
 
         while self.ix < n:
             # 循环插入csv文件
+            
             self.stock_code = self.stock_code_list[self.ix][:-3]
-            self.print_info('starting insert')
+            self.print_info_1('starting insert')
             self.find_insert_date(self.stock_code)
             self.myList(self.filename_dir_list)
             self.myInsert(self.date_table, self.sql_tuple)
-            self.print_info('insert ok.\n')
+            self.print_info_1('insert ok.\n')
             self.ix += 1
 
     def delete_repeat_data(self):
@@ -256,25 +261,33 @@ class Csv_into_mysql():
         table_name = self.cs.fetchall()
         for i in range(len(table_name)):
             # (2) 查看每个表中是否有重复数据
-            sql_2=f"select min(id) as id from `{table_name[i][0]}` group by stock_code having count(stock_code) > 1;"         
+            info_1=(str(i),'.检查表',table_name[i][0],'是否存在重复数据')
+            print(''.join(info_1))
+            sql_2=f"select min(id),stock_code as id from `{table_name[i][0]}` group by stock_code having count(stock_code) > 1;"         
             self.cs.execute(sql_2)
             stock_id = self.cs.fetchall()
             # (3) 删除重复数据
             if len(stock_id) != 0:
+                info_2=(table_name[i][0],'存在重复数据',str(len(stock_id)),'处')
+                print(''.join(info_2))
                 for j in range(len(stock_id)):
-                    sql_3 = f"delete from `{table_name[i][0]}` where id in ({stock_id[j][0]});"
+                    info_3=('删除第', str(j + 1),'处')
+                    print(''.join(info_3))
+                    sql_3 = f"delete from `{table_name[i][0]}` where id not in ({stock_id[j][0]}) and stock_code={stock_id[j][1]};"
                     self.cs.execute(sql_3)
                 self.conn.commit()
-                    
+
+
 
 def main():
     # 创建数据表
     csv_to_sql = Csv_into_mysql()
     # 选择要插入的数据的文件夹地址
-    path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
-    csv_to_sql.Insert_all_file(path)
+    # path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
+    # csv_to_sql.Insert_all_file(path)
+    
+    csv_to_sql.delete_repeat_data()
     csv_to_sql.close_conn()
-
 
 if __name__ == '__main__':
     main()

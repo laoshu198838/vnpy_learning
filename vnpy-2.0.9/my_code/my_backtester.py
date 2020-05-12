@@ -21,7 +21,7 @@ engine.set_parameters(
 
 engine.add_strategy(AtrRsiStrategy, {})
 # setting里面拥有的参数有些事从set_parameters里面进行进行选取的，但是就是不知道哪些参数是必须传的，哪些是不需要传的。
-engine.load_data()
+engine.load_data("mysql")
 engine.run_backtesting()
 engine.calculate_result()
 engine.calculate_statistics()
