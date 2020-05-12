@@ -346,6 +346,7 @@ class SqlManager(BaseDatabaseManager):
     """
 
     def __init__(self, class_bar: Type[Model], class_tick: Type[Model]):
+        # 传入的是实例化的model
         self.class_bar = class_bar
         self.class_tick = class_tick
 
@@ -357,6 +358,7 @@ class SqlManager(BaseDatabaseManager):
         start: datetime,
         end: datetime,
     ) -> Sequence[BarData]:
+    # select方法是peewee查找的具体方法
         s = (
             self.class_bar.select()
                 .where(

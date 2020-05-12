@@ -29,7 +29,7 @@ Extension：ctrl+shift+X
  """
 
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,time
 import os
 import random
 import numpy as np
@@ -43,32 +43,23 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from datetime import datetime
 import sys
-# client = MongoClient(host='localhost', port=27017)
+from peewee import *
+
+from vnpy.trader.constant import Exchange,Interval
+from vnpy.trader.database import database_manager
+from vnpy.trader.object import TickData
+from gm.api import *
+set_token('afb04b427d09c7b126c2b8b6cda6e3ee5b5d8a1a')
+
+history_data = history(symbol='SHFE.RB', frequency='tick', start_time='2019-08-28',  end_time='2019-12-30', df=True)
+print(history_data.shape)
+
+#  client = MongoClient(host='localhost', port=27017)
 # path = Path(r"C:\Users\Administrator\Desktop\1")
-import collections
-l = ['a', 'b', 'c']
-dq = collections.deque(l)
 
 from typing import List, Tuple, Dict
 
-from collections import namedtuple
-City=namedtuple('city','name country population coordinates')
-tokyo=City('Tokyo','JP','36.933',(35.689722,139.691667))
-print(tokyo.name)
-print(tokyo.country)
-tuple_1 = ((3, 4), (2,1))
-tuple_1 = [i for j in tuple_1 for i in j]
-print(tuple_1)
-def test(a:int, s:str, f:float, b:bool) -> Tuple[int, Tuple, Dict, bool]:
-    l = a
-    tup = tuple(s)
-    di = {'key': f}
-    bo = b
-    return l, tup, di, bo
-print(test(12, 'test', 1.00, 1))
 
-from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QIcon
 
 from pymysql import connect
 conn = connect(
@@ -76,11 +67,38 @@ conn = connect(
     port=3306,
     user='root',
     password='zlb198838',
-    database='stock_date_db',
+    database='stock_code_db',
     charset='utf8'
 )
 cs_1 = conn.cursor()
+sql="show tables"
+cs_1.execute(sql)
 
+
+db = MySQLDatabase("python_test", host="localhost", port=3306, user="root", passwd="zlb198838")
+db.connect()
+
+class BaseModel(Model):
+
+    class Meta:
+        database = db
+
+
+class User(BaseModel):
+    username = CharField(unique=True)
+
+
+class Tweet(BaseModel):
+    user = ForeignKeyField(User, related_name='tweets')
+    message = TextField()
+    created_date = DateTimeField(default=datetime.now)
+    is_published = BooleanField(default=True)
+
+
+if __name__ == "__main__":
+    # 创建表
+    User.create_table()  # 创建User表
+    Tweet.create_table()  # 创建Tweet表
 
 def record_insert_date(self, stock: str, date):
     """ 

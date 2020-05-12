@@ -8,7 +8,7 @@ def init(settings: dict) -> BaseDatabaseManager:
         return init_nosql(driver=driver, settings=settings)
     else:
         return init_sql(driver=driver, settings=settings)
-
+    # 这个是怎么读取到.vntrader/vt_setting.json中的数据库配置信息
 
 def init_sql(driver: Driver, settings: dict):
     from .database_sql import init

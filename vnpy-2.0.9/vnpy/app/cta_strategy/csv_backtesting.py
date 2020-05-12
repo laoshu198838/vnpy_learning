@@ -226,10 +226,10 @@ class CsvBacktestingEngine(BacktestingEngine):
             for filename in filenames:
                 # 判断交易所
                 if filename.startswith("6") or filename.startswith("8"):
-                    stock_code=filename[:-4] + ".SH"
+                    stock_code=filename[:-4] + ".SSE"
                     stock_code_list.append(stock_code)
                 else:
-                    stock_code=filename[:-4] + ".SZ"
+                    stock_code=filename[:-4] + ".SZSE"
                     stock_code_list.append(stock_code)
                 # 判断文件后缀
                 if filename.endswith(".csv"):
