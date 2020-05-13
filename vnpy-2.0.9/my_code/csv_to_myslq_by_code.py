@@ -54,7 +54,7 @@ class Csv_into_mysql():
         self.cs.close()
         self.conn.close()
 
-    def createTable(self, stock_code:str):
+    def createTable(self, stock_code: str):
         """
         创建数据库表
         sql="create table if not exists `0010`(
@@ -63,7 +63,7 @@ class Csv_into_mysql():
             (id int primary key not null auto_increment,name varchar(30));"
         :return:
         """
-        sql_db =f"select table_name from information_schema.tables where table_name = '{self.stock_code}';"
+        sql_db = f"select table_name from information_schema.tables where table_name = '{self.stock_code}';"
         if self.cs.execute(sql_db) == 0:
             try:
                 sql = f"create table if not exists `{self.stock_code}`(\
@@ -90,7 +90,7 @@ class Csv_into_mysql():
                 print(list)
         else:
             return
-    
+
     def myList(self, filename_dir: list):
         """
         import csv:
@@ -105,7 +105,8 @@ class Csv_into_mysql():
         (1991-04-08  48.04  48.04  48.04  48.04  2.0  10.0),
         ...]
         """
-        columns=['trade_date','open','high','low','close','vol','amount']
+        columns = ['trade_date', 'open', 'high',
+                   'low', 'close', 'vol', 'amount']
         self.stock_code = self.stock_code_list[self.ix][:-3]
         # [2, 3, 4, 5, 6, 10, 11]
         # 获取并处理df数据
@@ -127,7 +128,7 @@ class Csv_into_mysql():
             },
             inplace=True
         )
-       
+
         # 把数字日期格式转化为指定日期格式
         df_all.datetime = pd.to_datetime(df_all.datetime, format='%Y%m%d')
         df_all.sort_values(by=['datetime'], ascending=True, inplace=True)
@@ -145,8 +146,8 @@ class Csv_into_mysql():
         df_part = df_part.drop('datetime', axis=1)
         # 处理其中的NaN值
         if df_part.isnull().values.any() == True:
-            df_part.fillna(0,inplace=True)
-        
+            df_part.fillna(0, inplace=True)
+
         # 判断存入数据是否为空
         if len(df_part) == 0:
             print(self.stock_code + ' has no new data to insert!.')
@@ -154,7 +155,7 @@ class Csv_into_mysql():
 
         # df转化为[(),()]
         self.my_list = [tuple(i) for i in df_part.itertuples()]
-        
+
         return self.my_list
 
     def myInsert(self, newList: list):
@@ -176,7 +177,7 @@ class Csv_into_mysql():
         except Exception as e:
             print(e)
 
-    def print_info(self, info:str):
+    def print_info(self, info: str):
         """ 打印过程信息 """
         n = len(self.filename_dir_list)
         print(str(self.ix + 1), '/', str(n) + ':(' +
@@ -188,7 +189,7 @@ class Csv_into_mysql():
         """
         self.stock_code_list, self.filename_dir_list = self.get_filename(path)
         n = len(self.filename_dir_list)
-        
+
         while self.ix < n:
             # 循环插入csv文件
             self.stock_code = self.stock_code_list[self.ix][:-3]
@@ -199,31 +200,47 @@ class Csv_into_mysql():
             self.print_info('insert ok.\n')
             self.ix += 1
 
-    def add_field(self):
+    def lack_field(self):
         """
         field=['id','symbol','exchange','datetime','interval','volume','open_interest','open_price','high_price','close_price']
         """
-        field={'id','symbol','exchange','datetime','interval','volume','open_interest','open_price','high_price','close_price'}
-        sql = f"select COLUMN_NAME from INFORMATION_SCHEMA.Columns where table_name='000001';"
-        self.cs.execute(sql)
-        table_field = self.cs.fetchall()
-        
-        table_field = {x for y in table_field for x in y}
-        add_field=field-table_field
-        
+        # (1)查询数据库中所有的表名
         sql_1 = "show tables;"
         self.cs.execute(sql_1)
         table = self.cs.fetchall()
         table = [x for y in table for x in y]
-        print(table[0:5])
-
+        self.conn.rollback()
         for i in range(len(table)):
-            sql_2 = f"alter table `{table[i]}` add ( 
-                'symbol' varchar(6) not null,
-                'exchange' varchar(4) not null,
-                'open_interest' decimal(4,2) default 0,
-                'interval' varchar(2) not null);"
-            self.cs.execute(sql_2)
+            # (2)查看每个表中缺失的字段
+            field = {'id', 'exchange', 'datetime', 'interval', 'volume',
+                     'open_interest', 'open_price', 'high_price', 'close_price'}
+            
+            sql = f"select COLUMN_NAME from INFORMATION_SCHEMA.Columns where table_name='{table[i]}';"
+            self.cs.execute(sql)
+            table_field = self.cs.fetchall()
+            table_field = {x for y in table_field for x in y}
+            lack_field = list(field - table_field)
+
+            # (3)添加缺失字段
+            try:
+                for j in range(len(lack_field)):
+                    print(table[i])
+                    print(lack_field[j])
+                    if lack_field[j] == 'open_interest':
+                        sql_2 = f"ALTER TABLE `{table[i]}` ADD open_interest decimal(4, 2) default 0;"
+                        self.cs.execute(sql_2)
+                    elif lack_field[j] == 'interval':
+                        sql_3 = f"ALTER TABLE `{table[i]}` ADD interval_ varchar(4) not null default 'd';"
+                        self.cs.execute(sql_3)
+                    else:
+                        if table[i].startswith("6"):
+                            sql_4 = f"ALTER TABLE `{table[i]}` ADD exchange varchar(4) not null default 'SSE';"     
+                        else:
+                            sql_4 = f"ALTER TABLE `{table[i]}` ADD exchange varchar(4) not null default 'SZSE';"
+                        self.cs.execute(sql_4)
+                    time.sleep(0.01)
+            except Exception as e:
+                print(e)   
             self.conn.commit()
 
 
@@ -234,7 +251,8 @@ def main():
     path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
     # csv_to_sql.Insert_all_file(path)
     # csv_to_sql.close_conn()
-    csv_to_sql.add_field()
+    csv_to_sql.lack_field()
+
 
 if __name__ == '__main__':
     main()

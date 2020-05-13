@@ -283,8 +283,8 @@ def main():
     # 创建数据表
     csv_to_sql = Csv_into_mysql()
     # 选择要插入的数据的文件夹地址
-    # path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
-    # csv_to_sql.Insert_all_file(path)
+    path = 'D:\\The Road For Finacial Statics\\Python\\02.Learning Materrials\\02.Data\\02.daily_BarData'
+    csv_to_sql.Insert_all_file(path)
     
     csv_to_sql.delete_repeat_data()
     csv_to_sql.close_conn()

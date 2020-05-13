@@ -28,8 +28,10 @@ Extension：ctrl+shift+X
 格式化文档：alt+shift+F
  """
 
+from pymysql import connect
+from typing import List, Tuple, Dict
 from pathlib import Path
-from datetime import datetime, timedelta,time
+from datetime import datetime, timedelta, time
 import os
 import random
 import numpy as np
@@ -45,23 +47,105 @@ from datetime import datetime
 import sys
 from peewee import *
 
-from vnpy.trader.constant import Exchange,Interval
+from vnpy.trader.constant import Exchange, Interval
 from vnpy.trader.database import database_manager
 from vnpy.trader.object import TickData
 from gm.api import *
-set_token('afb04b427d09c7b126c2b8b6cda6e3ee5b5d8a1a')
+from peewee import *
 
-history_data = history(symbol='SHFE.RB', frequency='tick', start_time='2019-08-28',  end_time='2019-12-30', df=True)
-print(history_data.shape)
-
-#  client = MongoClient(host='localhost', port=27017)
-# path = Path(r"C:\Users\Administrator\Desktop\1")
-
-from typing import List, Tuple, Dict
-
+# 连接数据库
+database = MySQLDatabase('python_test', user='root',
+                         password='zlb198838', host='localhost', port=3306)
+database_1 = MySQLDatabase('stock_code_db', user='root',
+                         password='zlb198838', host='localhost', port=3306)
+# 定义Person
 
 
-from pymysql import connect
+class Class_4(Model):
+    id = AutoField()
+    symbol: str = CharField()
+    exchange: str = CharField()
+    datetime: datetime = DateTimeField()
+    interval: str = CharField()
+
+    volume: float = FloatField()
+    open_interest: float = FloatField()
+    open_price: float = FloatField()
+    high_price: float = FloatField()
+    low_price: float = FloatField()
+    close_price: float = FloatField()
+
+    class Meta:
+        database = database
+        indexes = ((("symbol", "exchange", "interval", "datetime"), True),)
+        # 表示这四个连起来必须唯一！！
+
+class User(Model):
+    id = AutoField()
+    username: str = CharField()
+    class Meta:
+        database = database
+        
+class Table_name(Model):
+    id = AutoField()
+    # symbol: str = CharField()
+    # exchange: str = CharField()
+    datetime: datetime = DateTimeField()
+    # interval: str = CharField()
+
+    open_price: float = FloatField()
+    high_price: float = FloatField()
+    low_price: float = FloatField()
+    close_price: float = FloatField()
+    volume: float = FloatField()
+    open_interest: float = FloatField()
+    class Meta:
+        database = database
+        table_name='000004'
+
+# df_all = pd.read_csv(
+#     r'C:\Users\Administrator\Desktop\000001.csv',
+#     # parse_dates=["trade_date"],
+#     usecols=[2, 3, 4, 5, 6, 7],
+#     # index_col=0
+# )
+# df_all=df_all[0:5]
+# tuple_data = [list(i) for i in df_all.itertuples()]
+# tuple_data[0][0]=8
+# print(tuple_data[0:5])
+# print(df_all.head(5))
+# database.connect()
+# database.create_tables([Table_name])
+# Table_name.insert_many(tuple_data, fields=[Table_name.id,Table_name.datetime,Table_name.open_price,Table_name.high_price,Table_name.low_price,Table_name.close_price,Table_name.volume]).execute()
+u1, u2, u3 = [User.create(username='ut%s' % i) for i in (1, 2, 3)]
+print(u1)
+# Now we'll modify the user instances.
+# u1.username = 'u1-x'
+# u2.username = 'u2-y'
+# u3.username = 'u3-z'
+
+# Update all three users with a single UPDATE query.
+User.bulk_update([u1, u2, u3], fields=[User.username])
+list_1=[]
+
+
+
+database.connect()
+database.create_tables([Class_4])
+user = User(id=3,username='Charlie')
+# print(user.save())
+# print(user.id)
+huey = User()
+# huey.username = 'Huey'
+# huey.save()
+print(User.insert(username='Mickey1').execute())
+# p=Class_1(id=175201, symbol='IF88',name='zhoulibing',exchange='SZSE',open_interest=0)
+p = Class_4(id=175201,exchange='SZSE', symbol='IF88', datetime=datetime(1990, 12, 22), interval='1m', volume=490, open_interest=0, open_price=3450, high_price=3488, low_price=3450, close_price=3450)
+# p_1=Class_4.insert(exchange='SZSE', symbol='IF88', datetime=datetime(1990, 12, 21), interval='1m', volume=490, open_interest=0, open_price=3450, high_price=3488, low_price=3450, close_price=3450).execute()
+p.save()
+Class_4.update({'symbol':"SZSE",'interval':"d"}).execute()
+# return Class_1
+
 conn = connect(
     host='localhost',
     port=3306,
@@ -71,12 +155,14 @@ conn = connect(
     charset='utf8'
 )
 cs_1 = conn.cursor()
-sql="show tables"
+sql = "show tables"
 cs_1.execute(sql)
 
 
-db = MySQLDatabase("python_test", host="localhost", port=3306, user="root", passwd="zlb198838")
+db = MySQLDatabase("python_test", host="localhost",
+                   port=3306, user="root", passwd="zlb198838")
 db.connect()
+
 
 class BaseModel(Model):
 
@@ -99,6 +185,7 @@ if __name__ == "__main__":
     # 创建表
     User.create_table()  # 创建User表
     Tweet.create_table()  # 创建Tweet表
+
 
 def record_insert_date(self, stock: str, date):
     """ 

@@ -96,12 +96,15 @@ def init_models(db: Database, driver: Driver):
 
         class Meta:
             database = db
+            # 指定具体的数据库
             indexes = ((("symbol", "exchange", "interval", "datetime"), True),)
+            # 四个字段构成唯一索引，不能全部重复
 
         @staticmethod
         def from_bar(bar: BarData):
             """
             Generate DbBarData object from BarData.
+            感觉这个地方是把bar数据转为数据的实例，然后方便保存进入数据库！！
             """
             db_bar = DbBarData()
 
