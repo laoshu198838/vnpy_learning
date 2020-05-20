@@ -102,6 +102,6 @@ def main():
 
     qapp.exec()
 
-
+# 这个主要用来启动VN trader的主界面，加载了主引擎和事件引擎
 if __name__ == "__main__":
     main()
