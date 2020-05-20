@@ -193,8 +193,8 @@ class Csv_into_mysql():
         else:
             self.insert_date = self.cs.fetchone()[0] + timedelta(days=1)
         self.insert_date = pd.Timestamp(self.insert_date)
+        
         return self.insert_date
-        return 
 
     def myInsert(self, date: list, sql_tuple: list):
         '''
@@ -263,13 +263,16 @@ class Csv_into_mysql():
             # (2) 查看每个表中是否有重复数据
             info_1=(str(i),'.检查表',table_name[i][0],'是否存在重复数据')
             print(''.join(info_1))
+            
             sql_2=f"select min(id),stock_code as id from `{table_name[i][0]}` group by stock_code having count(stock_code) > 1;"         
             self.cs.execute(sql_2)
             stock_id = self.cs.fetchall()
+            
             # (3) 删除重复数据
             if len(stock_id) != 0:
                 info_2=(table_name[i][0],'存在重复数据',str(len(stock_id)),'处')
                 print(''.join(info_2))
+                
                 for j in range(len(stock_id)):
                     info_3=('删除第', str(j + 1),'处')
                     print(''.join(info_3))

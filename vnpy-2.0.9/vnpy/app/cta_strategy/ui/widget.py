@@ -28,6 +28,7 @@ class CtaManager(QtWidgets.QWidget):
 
         self.main_engine = main_engine
         self.event_engine = event_engine
+        # APP_NAME = "CtaStrategy"
         self.cta_engine = main_engine.get_engine(APP_NAME)
 
         self.managers = {}

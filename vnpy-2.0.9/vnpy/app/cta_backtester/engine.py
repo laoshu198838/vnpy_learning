@@ -366,7 +366,7 @@ class BacktesterEngine(BaseEngine):
             start=start,
             end=end
         )
-
+        # 把查询需要的参数放入一个类中，
         contract = self.main_engine.get_contract(vt_symbol)
 
         try:

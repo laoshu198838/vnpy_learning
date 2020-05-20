@@ -345,7 +345,7 @@ class TickMonitor(BaseMonitor):
     event_type = EVENT_TICK
     data_key = "vt_symbol"
     sorting = True
-
+    # 这个是怎么更新的呢
     headers = {
         "symbol": {"display": "代码", "cell": BaseCell, "update": False},
         "exchange": {"display": "交易所", "cell": EnumCell, "update": False},
@@ -567,7 +567,7 @@ class TradingWidget(QtWidgets.QWidget):
     """
     General manual trading widget.
     """
-
+    # 自定义信号，当获取信号时，这个地方受到的一定是tick信号
     signal_tick = QtCore.pyqtSignal(Event)
 
     def __init__(self, main_engine: MainEngine, event_engine: EventEngine):
@@ -608,6 +608,7 @@ class TradingWidget(QtWidgets.QWidget):
         self.order_type_combo.addItems(
             [order_type.value for order_type in OrderType])
 
+        # 设置有效输入范围
         double_validator = QtGui.QDoubleValidator()
         double_validator.setBottom(0)
 
@@ -643,12 +644,14 @@ class TradingWidget(QtWidgets.QWidget):
         bid_color = "rgb(255,174,201)"
         ask_color = "rgb(160,255,160)"
 
+        # 创建左边的价格标签，放在全撤的下面
         self.bp1_label = self.create_label(bid_color)
         self.bp2_label = self.create_label(bid_color)
         self.bp3_label = self.create_label(bid_color)
         self.bp4_label = self.create_label(bid_color)
         self.bp5_label = self.create_label(bid_color)
 
+        # 创建右边的量标签，放在全撤的下面
         self.bv1_label = self.create_label(
             bid_color, alignment=QtCore.Qt.AlignRight)
         self.bv2_label = self.create_label(
@@ -660,12 +663,14 @@ class TradingWidget(QtWidgets.QWidget):
         self.bv5_label = self.create_label(
             bid_color, alignment=QtCore.Qt.AlignRight)
 
+        # 价格标签
         self.ap1_label = self.create_label(ask_color)
         self.ap2_label = self.create_label(ask_color)
         self.ap3_label = self.create_label(ask_color)
         self.ap4_label = self.create_label(ask_color)
         self.ap5_label = self.create_label(ask_color)
 
+        # 成交量标签
         self.av1_label = self.create_label(
             ask_color, alignment=QtCore.Qt.AlignRight)
         self.av2_label = self.create_label(
@@ -677,6 +682,7 @@ class TradingWidget(QtWidgets.QWidget):
         self.av5_label = self.create_label(
             ask_color, alignment=QtCore.Qt.AlignRight)
 
+        # 这个是什么，难道是放一个空的标签用于隔开bid_ask
         self.lp_label = self.create_label()
         self.return_label = self.create_label(alignment=QtCore.Qt.AlignRight)
 

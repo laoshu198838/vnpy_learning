@@ -10,7 +10,7 @@ from typing import Callable
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from vnpy.event import EventEngine
-from .widget import (
+from vnpy.trader.ui.widget import (
     TickMonitor,
     OrderMonitor,
     TradeMonitor,
@@ -24,10 +24,11 @@ from .widget import (
     AboutDialog,
     GlobalDialog
 )
-from .editor import CodeEditor
-from ..engine import MainEngine
-from ..utility import get_icon_path, TRADER_DIR
-
+# 此处一个点和两个点的差别
+from vnpy.trader.ui.editor import CodeEditor
+from vnpy.trader.engine import MainEngine
+from vnpy.trader.utility import get_icon_path, TRADER_DIR
+import sys
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -39,10 +40,11 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         self.main_engine = main_engine
         self.event_engine = event_engine
-
+        # 窗口的标题
         self.window_title = f"VN Trader [{TRADER_DIR}]"
-
+        # 连接的对话框
         self.connect_dialogs = {}
+        # 控件集合
         self.widgets = {}
 
         self.init_ui()
@@ -326,3 +328,11 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         dialog = GlobalDialog()
         dialog.exec_()
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    main = MainWindow(MainEngine,EventEngine)
+    main.show()
+
+    sys.exit(app.exec_())

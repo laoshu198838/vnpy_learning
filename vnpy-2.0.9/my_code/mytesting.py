@@ -53,6 +53,21 @@ from vnpy.trader.object import TickData
 from gm.api import *
 from peewee import *
 
+import sys
+from PyQt5.QtWidgets import QApplication,QWidget,QMainWindow
+from Ui_first import Ui_MainWindow
+import Ui_MainWinHorizontalLayout
+if __name__=='__main__':
+    # 创建QApplication类的实例
+    app = QApplication(sys.argv)
+    # 生成主窗口上
+    mainWindow = QMainWindow()
+    # 创建类
+    ui = Ui_MainWinHorizontalLayout.Ui_MainWindow()
+    # 主窗口添加控件
+    ui.setupUi(mainWindow)
+    mainWindow.show()
+    sys.exit(app.exec_())
 # 连接数据库
 database = MySQLDatabase('python_test', user='root',
                          password='zlb198838', host='localhost', port=3306)
@@ -103,12 +118,38 @@ class Table_name(Model):
         database = database
         table_name='000004'
 
-# df_all = pd.read_csv(
-#     r'C:\Users\Administrator\Desktop\000001.csv',
-#     # parse_dates=["trade_date"],
-#     usecols=[2, 3, 4, 5, 6, 7],
-#     # index_col=0
-# )
+
+
+df_all = pd.read_csv(
+    r'C:\Users\Administrator\Desktop\000001.csv',
+    # parse_dates=["trade_date"],
+    usecols=[2, 3, 4, 5, 6, 7],
+    # index_col=0
+)
+
+df_all.datetime=df_all.trade_date.apply(lambda x:pd.to_datetime(x))(df_all.trade_date)
+print(df_all.head(2))
+print(df_all.types)
+columns = df_all.columns
+print(columns)
+json_1 = df_all.to_json(orient="index")
+dict_1=df_all.to_dict(orient="records")
+print(dict_1)
+print(json_1[0])
+list_1 = [list(i) for i in df_all.iterlists()]
+
+print(list_1[0:5])
+df_part = df_all['trade_date']
+df_part_2=df_all[['trade_date']]
+print(df_part_2.head(5))
+print(type(df_part_2))
+print('===============')
+print(type(df_part))
+print(df_part.head(5))
+print('===============')
+list_1=df_part.tolist()
+list_2=df_part_2.tolist()
+print(list_1[0:5])
 # df_all=df_all[0:5]
 # tuple_data = [list(i) for i in df_all.itertuples()]
 # tuple_data[0][0]=8

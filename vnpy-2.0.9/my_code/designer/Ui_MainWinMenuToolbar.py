@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'd:\The Road For Finacial Statics\GitHub\vnpy_learning\vnpy_learning\vnpy-2.0.9\my_code\designer\MainWinMenuToolbar.ui'
+#
+# Created by: PyQt5 UI code generator 5.13.0
+#
+# WARNING! All changes made in this file will be lost!
+
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(800, 600)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.toolBar = QtWidgets.QToolBar(MainWindow)
+        self.toolBar.setObjectName("toolBar")
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.menuBar = QtWidgets.QMenuBar(MainWindow)
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 800, 23))
+        self.menuBar.setObjectName("menuBar")
+        self.menu = QtWidgets.QMenu(self.menuBar)
+        self.menu.setObjectName("menu")
+        self.menuEdit = QtWidgets.QMenu(self.menuBar)
+        self.menuEdit.setObjectName("menuEdit")
+        self.menu_2 = QtWidgets.QMenu(self.menuBar)
+        self.menu_2.setObjectName("menu_2")
+        self.menu_3 = QtWidgets.QMenu(self.menuBar)
+        self.menu_3.setObjectName("menu_3")
+        self.menushezhi = QtWidgets.QMenu(self.menuBar)
+        self.menushezhi.setObjectName("menushezhi")
+        self.menu_S = QtWidgets.QMenu(self.menuBar)
+        self.menu_S.setObjectName("menu_S")
+        self.menu_H = QtWidgets.QMenu(self.menuBar)
+        self.menu_H.setObjectName("menu_H")
+        MainWindow.setMenuBar(self.menuBar)
+        self.statusBar = QtWidgets.QStatusBar(MainWindow)
+        self.statusBar.setObjectName("statusBar")
+        MainWindow.setStatusBar(self.statusBar)
+        self.actionnew = QtWidgets.QAction(MainWindow)
+        self.actionnew.setObjectName("actionnew")
+        self.actionOpen = QtWidgets.QAction(MainWindow)
+        self.actionOpen.setObjectName("actionOpen")
+        self.actionClose = QtWidgets.QAction(MainWindow)
+        self.actionClose.setObjectName("actionClose")
+        self.actionUndo = QtWidgets.QAction(MainWindow)
+        self.actionUndo.setObjectName("actionUndo")
+        self.actiondsa = QtWidgets.QAction(MainWindow)
+        self.actiondsa.setObjectName("actiondsa")
+        self.actiondsadsa = QtWidgets.QAction(MainWindow)
+        self.actiondsadsa.setObjectName("actiondsadsa")
+        self.toolBar.addAction(self.actionnew)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionOpen)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionClose)
+        self.menu.addSeparator()
+        self.menu.addAction(self.actionnew)
+        self.menu.addAction(self.actionOpen)
+        self.menu.addAction(self.actionClose)
+        self.menuEdit.addAction(self.actionUndo)
+        self.menu_H.addSeparator()
+        self.menu_H.addAction(self.actiondsa)
+        self.menu_H.addSeparator()
+        self.menu_H.addAction(self.actiondsadsa)
+        self.menu_H.addSeparator()
+        self.menuBar.addAction(self.menu.menuAction())
+        self.menuBar.addAction(self.menuEdit.menuAction())
+        self.menuBar.addAction(self.menu_2.menuAction())
+        self.menuBar.addAction(self.menu_3.menuAction())
+        self.menuBar.addAction(self.menushezhi.menuAction())
+        self.menuBar.addAction(self.menu_S.menuAction())
+        self.menuBar.addAction(self.menu_H.menuAction())
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+        self.menu.setTitle(_translate("MainWindow", "文件"))
+        self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
+        self.menu_2.setTitle(_translate("MainWindow", "窗体"))
+        self.menu_3.setTitle(_translate("MainWindow", "视图"))
+        self.menushezhi.setTitle(_translate("MainWindow", "shezhi"))
+        self.menu_S.setTitle(_translate("MainWindow", "窗口(S)"))
+        self.menu_H.setTitle(_translate("MainWindow", "帮助(H)"))
+        self.actionnew.setText(_translate("MainWindow", "新建文件"))
+        self.actionOpen.setText(_translate("MainWindow", "Open"))
+        self.actionClose.setText(_translate("MainWindow", "Close"))
+        self.actionUndo.setText(_translate("MainWindow", "Undo"))
+        self.actiondsa.setText(_translate("MainWindow", "关于插件"))
+        self.actiondsadsa.setText(_translate("MainWindow", "dsadsa"))

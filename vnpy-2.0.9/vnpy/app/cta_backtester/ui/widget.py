@@ -24,7 +24,7 @@ class BacktesterManager(QtWidgets.QWidget):
     """"""
 
     setting_filename = "cta_backtester_setting.json"
-
+    # 获取信号
     signal_log = QtCore.pyqtSignal(Event)
     signal_backtesting_finished = QtCore.pyqtSignal(Event)
     signal_optimization_finished = QtCore.pyqtSignal(Event)
@@ -32,10 +32,11 @@ class BacktesterManager(QtWidgets.QWidget):
     def __init__(self, main_engine: MainEngine, event_engine: EventEngine):
         """"""
         super().__init__()
-
+        # 这个参数是从哪传进来的呢，还是不需要传了
         self.main_engine = main_engine
         self.event_engine = event_engine
 
+        # 获得回测引擎，但是这个回测引擎是在哪个地方被添加进去的呢？？难道启动的是这个BacktesterEngine？？
         self.backtester_engine = main_engine.get_engine(APP_NAME)
         self.class_names = []
         self.settings = {}
@@ -44,6 +45,7 @@ class BacktesterManager(QtWidgets.QWidget):
 
         self.init_ui()
         self.register_event()
+        # 启动一些需要的引擎，
         self.backtester_engine.init_engine()
         self.init_strategy_settings()
 
@@ -54,7 +56,8 @@ class BacktesterManager(QtWidgets.QWidget):
         for class_name in self.class_names:
             setting = self.backtester_engine.get_default_setting(class_name)
             self.settings[class_name] = setting
-
+        
+        # 将类添加到下拉列表中
         self.class_combo.addItems(self.class_names)
 
     def init_ui(self):
@@ -62,14 +65,17 @@ class BacktesterManager(QtWidgets.QWidget):
         self.setWindowTitle("CTA回测")
 
         # Setting Part
+        # 创建下来列表框保存具体策略
         self.class_combo = QtWidgets.QComboBox()
-
+        # 输入文本框，单行文本
         self.symbol_line = QtWidgets.QLineEdit("IF88.CFFEX")
-
+        # 供选择的回测周期
         self.interval_combo = QtWidgets.QComboBox()
+        # 把已经存在的回测周期添加到下拉列表中
         for inteval in Interval:
             self.interval_combo.addItem(inteval.value)
-
+        
+        # 默认设置为截止到今天之前的三年
         end_dt = datetime.now()
         start_dt = end_dt - timedelta(days=3 * 365)
 
@@ -165,6 +171,7 @@ class BacktesterManager(QtWidgets.QWidget):
         left_vbox.addLayout(form)
         left_vbox.addWidget(backtesting_button)
         left_vbox.addWidget(downloading_button)
+        # 不知道这个是做什么用的
         left_vbox.addStretch()
         left_vbox.addLayout(result_grid)
         left_vbox.addStretch()
@@ -176,7 +183,8 @@ class BacktesterManager(QtWidgets.QWidget):
 
         # Result part
         self.statistics_monitor = StatisticsMonitor()
-
+        # 和QLineEdit的区别就是，line只能是单行数据
+        # QTextEdit显示多行文本内容，当文本内容超出控件显示范围时，可以显示水平和垂直滚动条。
         self.log_monitor = QtWidgets.QTextEdit()
         self.log_monitor.setMaximumHeight(400)
 
@@ -525,7 +533,7 @@ class StatisticsMonitor(QtWidgets.QTableWidget):
     def __init__(self):
         """"""
         super().__init__()
-
+        # 这个用来做什么
         self.cells = {}
 
         self.init_ui()
@@ -534,21 +542,23 @@ class StatisticsMonitor(QtWidgets.QTableWidget):
         """"""
         self.setRowCount(len(self.KEY_NAME_MAP))
         self.setVerticalHeaderLabels(list(self.KEY_NAME_MAP.values()))
-
+        # 设置表格除标题以外的列数，并让数字作为列名
         self.setColumnCount(1)
+        # 设置数字列名不可见
         self.horizontalHeader().setVisible(False)
+        # 自适应布局的大小
         self.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.Stretch
         )
         self.setEditTriggers(self.NoEditTriggers)
-
+        # 每一行根据表名绑定一个Item
         for row, key in enumerate(self.KEY_NAME_MAP.keys()):
             cell = QtWidgets.QTableWidgetItem()
             self.setItem(row, 0, cell)
             self.cells[key] = cell
 
     def clear_data(self):
-        """"""
+        """清空cells的内容"""
         for cell in self.cells.values():
             cell.setText("")
 
@@ -572,7 +582,8 @@ class StatisticsMonitor(QtWidgets.QTableWidget):
         data["return_std"] = f"{data['return_std']:,.2f}%"
         data["sharpe_ratio"] = f"{data['sharpe_ratio']:,.2f}"
         data["return_drawdown_ratio"] = f"{data['return_drawdown_ratio']:,.2f}"
-
+        
+        # 把每一行的值进行绑定
         for key, cell in self.cells.items():
             value = data.get(key, "")
             cell.setText(str(value))

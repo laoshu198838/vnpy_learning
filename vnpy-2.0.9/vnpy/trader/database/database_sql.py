@@ -65,6 +65,7 @@ def init_postgresql(settings: dict):
 class ModelBase(Model):
 
     def to_dict(self):
+        # 在save_bar_data等函数中有用到
         return self.__data__
 
 
@@ -160,6 +161,7 @@ def init_models(db: Database, driver: Driver):
                         ).execute()
                 else:
                     for c in chunked(dicts, 50):
+                    # 每次最多插入50行
                         DbBarData.insert_many(
                             c).on_conflict_replace().execute()
 
@@ -352,7 +354,7 @@ class SqlManager(BaseDatabaseManager):
         # 传入的是实例化的model
         self.class_bar = class_bar
         self.class_tick = class_tick
-    # 他是怎么就能够被调用了呢
+    # 把两个数据的行类传入进来
     def load_bar_data(
         self,
         symbol: str,
@@ -394,6 +396,7 @@ class SqlManager(BaseDatabaseManager):
         return data
 
     def save_bar_data(self, datas: Sequence[BarData]):
+        """ 把bar相关的数据保存到数据库里面 """
         ds = [self.class_bar.from_bar(i) for i in datas]
         self.class_bar.save_all(ds)
 
