@@ -38,6 +38,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, main_engine: MainEngine, event_engine: EventEngine):
         """"""
         super(MainWindow, self).__init__()
+        # 这两个参数在调用他们的时候传入了
         self.main_engine = main_engine
         self.event_engine = event_engine
         # 窗口的标题
@@ -93,8 +94,9 @@ class MainWindow(QtWidgets.QMainWindow):
         bar = self.menuBar()
 
         # System menu
+        # 添加系统菜单名称
         sys_menu = bar.addMenu("系统")
-
+        # 这些接口会在前面的某一个地方已经添加进去了
         gateway_names = self.main_engine.get_all_gateway_names()
         for name in gateway_names:
             func = partial(self.connect, name)
@@ -200,6 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         func: Callable,
     ):
         """"""
+        # 获取对应的图标
         icon = QtGui.QIcon(get_icon_path(__file__, icon_name))
 
         action = QtWidgets.QAction(action_name, self)
