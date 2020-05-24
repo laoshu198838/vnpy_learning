@@ -93,7 +93,7 @@ class CtaEngine(BaseEngine):
 
         self.symbol_strategy_map = defaultdict(
             list)                   
-        # vt_symbol: strategy list
+        # vt_symbol: strategy list，如：{rb2010：[AtrRsiStrategy,BollChannelStrategy]}
         self.orderid_strategy_map = {}  
         # vt_orderid: strategy
         self.strategy_orderid_map = defaultdict(
@@ -117,6 +117,7 @@ class CtaEngine(BaseEngine):
 
     def init_engine(self):
         """
+        启动策略之前的准备工作
         """
         self.init_rqdata()
         #如果没配置rqdata的可忽略
@@ -133,11 +134,11 @@ class CtaEngine(BaseEngine):
         self.write_log("CTA策略引擎初始化成功")
 
     def close(self):
-        """"""
+        """停止所有的策略"""
         self.stop_all_strategies()
 
     def register_event(self):
-        """"""
+        """注册事件处理函数"""
         self.event_engine.register(EVENT_TICK, self.process_tick_event)
         self.event_engine.register(EVENT_ORDER, self.process_order_event)
         self.event_engine.register(EVENT_TRADE, self.process_trade_event)
@@ -631,7 +632,7 @@ class CtaEngine(BaseEngine):
         if not strategy_class:
             self.write_log(f"创建策略失败，找不到策略类{class_name}")
             return
-
+        # 这里面的self传入的是CtaEngine
         strategy = strategy_class(self, strategy_name, vt_symbol, setting)
         self.strategies[strategy_name] = strategy
 
@@ -954,6 +955,7 @@ class CtaEngine(BaseEngine):
         # Event是一个类，用于存储事件类型和具体事件数据
         self.event_engine.put(event)
         # 把相关事件推到队列当中去，然后会自动的去读取队列
+        
     def send_email(self, msg: str, strategy: CtaTemplate = None):
         """
         Send email to default receiver.

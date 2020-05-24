@@ -353,8 +353,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return widget, dock
         
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    main = MainWindow(MainEngine,EventEngine)
+    app=QtGui.QApplication(sys.argv)
+    main=MainWindow()
     main.show()
-
-    sys.exit(app.exec_())
+    app.exec_()

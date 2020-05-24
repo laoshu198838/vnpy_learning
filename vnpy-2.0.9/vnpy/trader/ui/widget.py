@@ -497,13 +497,13 @@ class ConnectDialog(QtWidgets.QDialog):
         self.main_engine = main_engine
         self.gateway_name = gateway_name
         self.filename = f"connect_{gateway_name.lower()}.json"
-
+        # 保存控件的相关相关信息
         self.widgets = {}
 
         self.init_ui()
 
     def init_ui(self):
-        """"""
+        """创建连接界面"""
         self.setWindowTitle(f"连接{self.gateway_name}")
 
         # Default setting provides field name, field data type and field default value.
@@ -520,23 +520,30 @@ class ConnectDialog(QtWidgets.QDialog):
             field_type = type(field_value)
 
             if field_type == list:
+                # 下拉列表
                 widget = QtWidgets.QComboBox()
+                # 往下拉列表中添加值
                 widget.addItems(field_value)
 
                 if field_name in loaded_setting:
                     saved_value = loaded_setting[field_name]
+                    # 找到对应值的索引
                     ix = widget.findText(saved_value)
+                    # 根据索引显示当前值
                     widget.setCurrentIndex(ix)
             else:
+                # 创建当行文本控件，并填入默认值
                 widget = QtWidgets.QLineEdit(str(field_value))
 
                 if field_name in loaded_setting:
                     saved_value = loaded_setting[field_name]
+                    # 根据上次的数据修改这次默认填写的当前值
                     widget.setText(str(saved_value))
-
+            # 在表单布局中添加行数据
             form.addRow(f"{field_name} <{field_type.__name__}>", widget)
+            # 保存字段名、控件和控件中的值类型
             self.widgets[field_name] = (widget, field_type)
-
+        # 创建连接按钮
         button = QtWidgets.QPushButton("连接")
         button.clicked.connect(self.connect)
         form.addRow(button)
@@ -549,17 +556,18 @@ class ConnectDialog(QtWidgets.QDialog):
         """
         setting = {}
         for field_name, tp in self.widgets.items():
+            # 元组解析
             widget, field_type = tp
             if field_type == list:
                 field_value = str(widget.currentText())
             else:
                 field_value = field_type(widget.text())
             setting[field_name] = field_value
-
+        # 连接之前先保存相关设置数据
         save_json(self.filename, setting)
 
         self.main_engine.connect(setting, self.gateway_name)
-
+        # 这个不知道在做什么？？
         self.accept()
 
 
@@ -923,6 +931,7 @@ class ContractManager(QtWidgets.QWidget):
         self.resize(1000, 600)
 
         self.filter_line = QtWidgets.QLineEdit()
+        # 设置输入前的提示语句
         self.filter_line.setPlaceholderText("输入合约代码或者交易所，留空则查询所有合约")
 
         self.button_show = QtWidgets.QPushButton("查询")
@@ -933,19 +942,28 @@ class ContractManager(QtWidgets.QWidget):
             label = f"{display}\n{name}"
             labels.append(label)
 
+        # 显示数据表格的控件
         self.contract_table = QtWidgets.QTableWidget()
+        # 设置表格第一行的长度
         self.contract_table.setColumnCount(len(self.headers))
+        # 设置表头
         self.contract_table.setHorizontalHeaderLabels(labels)
+        # 垂直表头不可见
         self.contract_table.verticalHeader().setVisible(False)
+        # 让表格不能编辑
         self.contract_table.setEditTriggers(self.contract_table.NoEditTriggers)
+        # 背景色进行交替
         self.contract_table.setAlternatingRowColors(True)
-
+        # 添加水平布局
         hbox = QtWidgets.QHBoxLayout()
+        # 在水平布局中添加两个控件作为一个整体
         hbox.addWidget(self.filter_line)
         hbox.addWidget(self.button_show)
-
+        # 添加垂直布局控件
         vbox = QtWidgets.QVBoxLayout()
+        # 在垂直布局里面添加水平布局
         vbox.addLayout(hbox)
+        # 在垂直布局里面添加合约表格
         vbox.addWidget(self.contract_table)
 
         self.setLayout(vbox)
@@ -975,7 +993,7 @@ class ContractManager(QtWidgets.QWidget):
                 else:
                     cell = BaseCell(value, contract)
                 self.contract_table.setItem(row, column, cell)
-
+        # 根据内容自动调整列的宽
         self.contract_table.resizeColumnsToContents()
 
 
@@ -1034,6 +1052,7 @@ class GlobalDialog(QtWidgets.QDialog):
         self.setMinimumWidth(800)
 
         settings = copy(SETTINGS)
+        用SETTING_FILENAME的文件更新settings数据
         settings.update(load_json(SETTING_FILENAME))
 
         # Initialize line edits and form layout based on setting.

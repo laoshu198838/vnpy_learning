@@ -188,7 +188,7 @@ class BarGenerator:
     def update_tick(self, tick: TickData):
         """
         事件驱动
-        它是如何知道有新的tick进来的，难道是自动检测吗，如果是他是在哪个地方可以自动检测新的tick，
+        她是被具体的策略调用，具体的策略是因为注册了事件响应函数，所以能够被调用
         然后加载进入update_tick
         Update new tick data into generator.
         tick后面的:是用来进行解释参数的,能够对tick里面的数据进行联想，方便输入
@@ -210,8 +210,8 @@ class BarGenerator:
             self.bar.datetime = self.bar.datetime.replace(
                 second=0, microsecond=0
             )
-            self.on_bar(self.bar)  # 把他推送出去是什么意思，难道bar是正在处理的，on_bar是已经处理好了
-            # 类似一个仓库一样
+            self.on_bar(self.bar)  # 把上一根已经完成的bar推送出去，然后接着处理新的tick数据，on_bar是已经处理好了
+            # 这个self.on_bar是具体策略中的on_bar函数用来处理bar数据的
 
             new_minute = True
 
@@ -243,7 +243,7 @@ class BarGenerator:
             # tick.volume表示的是截止到目前全部的成交量
             self.bar.volume += max(volume_change, 0)
 
-        self.last_tick = tick  # 这个tick是一条一条推送的吗，要不然有几行怎么知道选哪行呢
+        self.last_tick = tick  # 主要是为了方便上面计算volume，这个tick是一条一条推送的吗，要不然有几行怎么知道选哪行呢
 
     def update_bar(self, bar: BarData):
         """

@@ -24,7 +24,8 @@ class QComboxDemo(QWidget):
         self.cb.addItem('C++')
         self.cb.addItem('Python')
         self.cb.addItems(['Java', 'C#', 'Ruby'])
-        
+        ix=self.cb.findText('C#')
+        self.cb.setCurrentIndex(ix)
         self.cb.currentIndexChanged.connect(self.selectionChange)
 
         layout.addWidget(self.label1)

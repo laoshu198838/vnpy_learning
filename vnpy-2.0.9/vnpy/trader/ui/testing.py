@@ -49,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(self.window_title)
         # self.init_dock()
         # self.init_toolbar()
-        self.init_menu()
+        self.genMenubar()
         # self.load_window_setting("custom")
     
     def init_menu(self):
@@ -164,19 +164,36 @@ class MainWindow(QtWidgets.QMainWindow):
 
         dialog.exec_()
 
+    def genMenubar(self):
+            """
+            Generate menubar.
+            """
+            menubar = self.menuBar()
+
+            # File
+            loadAction = QtWidgets.QAction('Load', self)
+            # loadAction.triggered.connect(self.loadLibFile)
+
+            exitAction = QtWidgets.QAction('Quit', self)
+            # exitAction.triggered.connect(qApp.quit)
+
+            fileMenu = menubar.addMenu('File')
+            fileMenu.addAction(loadAction)
+            fileMenu.addAction(exitAction)
+
 def get_icon_path(filepath: str, ico_name: str):
     """
     Get path for icon file with ico name.
     """
     ui_path = Path(filepath).parent
-    print(ui_path)
+
     icon_path = ui_path.joinpath("ico", ico_name)
     return str(icon_path)    
 
 
 if __name__ == "__main__":
-    # app = QtWidgets.QApplication(sys.argv)
-    # main = MainWindow()
-    # main.show()
-    print(get_icon_path(__file__, 'connect.ico'))
-    # sys.exit(app.exec_())
+    app = QtWidgets.QApplication(sys.argv)
+    main = MainWindow()
+    main.show()
+    # print(get_icon_path(__file__, 'connect.ico'))
+    sys.exit(app.exec_())

@@ -24,7 +24,7 @@ from vnpy.trader.ui.widget import (
     AboutDialog,
     GlobalDialog
 )
-# 此处一个点和两个点的差别
+
 from vnpy.trader.ui.editor import CodeEditor
 from vnpy.trader.engine import MainEngine
 from vnpy.trader.utility import get_icon_path, TRADER_DIR
@@ -99,11 +99,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # 这些接口会在前面的某一个地方已经添加进去了
         gateway_names = self.main_engine.get_all_gateway_names()
         for name in gateway_names:
+            # partial有延迟生效函数
             func = partial(self.connect, name)
+            # 完成了图标、子目录、连接功能、绑定上级目录
             self.add_menu_action(sys_menu, f"连接{name}", "connect.ico", func)
-
+        # 在此处加一条线进行区分
         sys_menu.addSeparator()
-
+        # 创建退出子目录
         self.add_menu_action(sys_menu, "退出", "exit.ico", self.close)
 
         # App menu
@@ -111,14 +113,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
         all_apps = self.main_engine.get_all_apps()
         for app in all_apps:
+            # app.app_module是什么
             ui_module = import_module(app.app_module + ".ui")
+            # 返回对象的属性
             widget_class = getattr(ui_module, app.widget_name)
 
             func = partial(self.open_widget, widget_class, app.app_name)
             icon_path = str(app.app_path.joinpath("ui", app.icon_name))
+            # 添加菜单栏
             self.add_menu_action(
                 app_menu, app.display_name, icon_path, func
             )
+            # 添加工具栏
             self.add_toolbar_action(
                 app.display_name, icon_path, func
             )
@@ -126,6 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Global setting editor
         action = QtWidgets.QAction("配置", self)
         action.triggered.connect(self.edit_global_setting)
+        # 如果菜单栏没有子级，直接用这个就可以了。
         bar.addAction(action)
 
         # Help menu
@@ -178,20 +185,23 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
     def init_toolbar(self):
-        """"""
+        """创建一个工具栏"""
         self.toolbar = QtWidgets.QToolBar(self)
         self.toolbar.setObjectName("工具栏")
+        # 不能作为独立小窗口拖放
         self.toolbar.setFloatable(False)
+        # 不能在主窗口范围内拖拽移动
         self.toolbar.setMovable(False)
 
         # Set button size
         w = 40
         size = QtCore.QSize(w, w)
+        # 设置里面所有图标的大小
         self.toolbar.setIconSize(size)
 
         # Set button spacing
         self.toolbar.layout().setSpacing(10)
-
+        # 添加工具栏的位置
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
 
     def add_menu_action(
@@ -201,14 +211,16 @@ class MainWindow(QtWidgets.QMainWindow):
         icon_name: str,
         func: Callable,
     ):
-        """"""
+        """创建目录中的子目录"""
         # 获取对应的图标
         icon = QtGui.QIcon(get_icon_path(__file__, icon_name))
-
+        # 创建子目录
         action = QtWidgets.QAction(action_name, self)
+        # 子目录连接对象
         action.triggered.connect(func)
+        # 子目录与图表绑定
         action.setIcon(icon)
-
+        # 把子目录添加到上级目录中
         menu.addAction(action)
 
     def add_toolbar_action(
@@ -282,7 +294,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not widget:
             widget = widget_class(self.main_engine, self.event_engine)
             self.widgets[name] = widget
-
+        # isinstance(object, classinfo)
         if isinstance(widget, QtWidgets.QDialog):
             widget.exec_()
         else:

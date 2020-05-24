@@ -96,6 +96,7 @@ class EventEngine:
         """
         while self._active:
             sleep(self._interval)
+            # 不知道这个EVENT_TIMER有什么用
             event = Event(EVENT_TIMER)
             self.put(event)
 

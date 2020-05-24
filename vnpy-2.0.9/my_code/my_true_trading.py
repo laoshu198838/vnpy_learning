@@ -62,17 +62,22 @@ def run_child():
     main_engine.write_log("注册日志事件监听")
 
     main_engine.connect(ctp_setting, "CTP")
-    # 加载了CtpGateway之后才能使用connect进行连接
     main_engine.write_log("连接CTP接口")
+    
+    sleep(1)
+    
     main_engine.get_all_contracts()
+    sleep(2)
     cta_engine.init_engine()
     main_engine.write_log("CTA策略初始化完成")
-    # cta_engine.load_strategy_class()
-    # cta_engine.add_strategy('AtrRsiStrategy', 'AtrRsiStrategy', "IF888.CFFEX", strategy_setting)
-    # print(cta_engine.strategies)
+    
+    
     cta_engine.init_strategy('AtrRsiStrategy')
+    # 给策略初始化留足时间
+    sleep(1)
     main_engine.write_log("CTA策略全部初始化")
-    cta_engine.start_all_strategies()
+    
+    cta_engine.start_strategy('AtrRsiStrategy')
     main_engine.write_log("CTA策略全部启动")
 
     while True:
