@@ -158,7 +158,7 @@ class CtaTemplate(ABC):
         """
         pass
 
-    # 委托推送
+    # 委托推送，国内一般是on_order优于on_trade
     @virtual
     def on_order(self, order: OrderData):
         """
@@ -173,7 +173,7 @@ class CtaTemplate(ABC):
         Callback of stop order update.
         """
         pass
-
+    # 如何确定是哪一个订单下的
     def buy(self, price: float, volume: float, stop: bool = False, lock: bool = False):
         """
         Send buy order to open a long position.

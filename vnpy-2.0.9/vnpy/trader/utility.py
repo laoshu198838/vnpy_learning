@@ -282,7 +282,7 @@ class BarGenerator:
         finished = False
 
         if self.interval == Interval.MINUTE:
-            # x-minute bar
+            # x-minute bar,%表示求余
             if not (bar.datetime.minute + 1) % self.window:
                 finished = True
         elif self.interval == Interval.HOUR:
