@@ -12,7 +12,7 @@ from .template import CtaTemplate, CtaSignal, TargetPosTemplate
 
 
 class CtaStrategyApp(BaseApp):
-    """"""
+    """相关功能的汇集点"""
 
     app_name = APP_NAME
     # APP_NAME = "CtaStrategy"

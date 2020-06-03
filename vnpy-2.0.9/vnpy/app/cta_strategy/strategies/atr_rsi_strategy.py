@@ -78,6 +78,7 @@ class AtrRsiStrategy(CtaTemplate):
         """
         Callback of new tick data update.
         """
+        print(2)
         self.bg.update_tick(tick)
 
     def on_bar(self, bar: BarData):

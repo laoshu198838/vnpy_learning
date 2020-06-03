@@ -45,6 +45,7 @@ def run_child():
     SETTINGS["log.file"] = True
 
     event_engine = EventEngine()
+    print(event_engine.__module__)
     # 把event和处理函数联系起来
     main_engine = MainEngine(event_engine)
     # 一个大的类来把策略、ctp行情、事件引擎和实盘引擎结合起来。
@@ -130,5 +131,7 @@ def run_parent():
 
 
 if __name__ == "__main__":
-    run_parent()
+    # run_parent()
+    event_engine = EventEngine()
+    print(event_engine.__module__)
     

@@ -36,11 +36,15 @@ class BaseCell(QtWidgets.QTableWidgetItem):
     """
     General cell used in tablewidgets.
     """
+    # 这个就相当于excel中产生单元格一样，
+    # 
 
     def __init__(self, content: Any, data: Any):
         """"""
         super(BaseCell, self).__init__()
+        
         self.setTextAlignment(QtCore.Qt.AlignCenter)
+
         self.set_content(content, data)
 
     def set_content(self, content: Any, data: Any):
@@ -196,9 +200,11 @@ class BaseMonitor(QtWidgets.QTableWidget):
 
         self.main_engine = main_engine
         self.event_engine = event_engine
+        # 用来保存具体的vt_symbol
         self.cells = {}
 
         self.init_ui()
+        # 注册了所有的收到的数据
         self.register_event()
 
     def init_ui(self):
@@ -210,22 +216,30 @@ class BaseMonitor(QtWidgets.QTableWidget):
         """
         Initialize table.
         """
+        # 设置表格的列数
         self.setColumnCount(len(self.headers))
-
+        # 读取表头的名称，保存为列表
         labels = [d["display"] for d in self.headers.values()]
+        # 设置水平表头名称
         self.setHorizontalHeaderLabels(labels)
-
+        # 垂直表头不可见，也就是序列号不可见
         self.verticalHeader().setVisible(False)
+        # 表示这个表是不可被编辑的
         self.setEditTriggers(self.NoEditTriggers)
+        # 每隔一行，颜色进行交替变化
         self.setAlternatingRowColors(True)
+        # 可以按照表头的某一列进行排序
         self.setSortingEnabled(self.sorting)
 
     def init_menu(self):
         """
         Create right click menu.
         """
+        # 设置右键菜单，QMenu可以用来做功能之前的界面。
+        # QMenu添加的就是菜单项，其并没有Action，可以理解为并没有执行力，只是个菜单的图形界面。
         self.menu = QtWidgets.QMenu(self)
 
+        # 如果需要执行功能，就要addAction，其加入Action之后，会在其后的子菜单出现Action的名字。
         resize_action = QtWidgets.QAction("调整列宽", self)
         resize_action.triggered.connect(self.resize_columns)
         self.menu.addAction(resize_action)
@@ -246,13 +260,15 @@ class BaseMonitor(QtWidgets.QTableWidget):
         """
         Process new data from event and update into table.
         """
+        # 把收到的数据更新到表格中
         # Disable sorting to prevent unwanted error.
         if self.sorting:
+            # 暂时把排序关了，方便添加数据
             self.setSortingEnabled(False)
 
         # Update data into table.
         data = event.data
-
+        # 这个不是一开始就有了吗？怎么还会出现没有情况呢？？
         if not self.data_key:
             self.insert_new_row(data)
         else:
@@ -278,23 +294,30 @@ class BaseMonitor(QtWidgets.QTableWidget):
             setting = self.headers[header]
 
             content = data.__getattribute__(header)
+            # 返回的是QTableWidgetItem，也就是表格中的内容。
+            # cell是table中的一个单元格并保存有相关数据
             cell = setting["cell"](content, data)
+            # 向第0行，column列传入数据，
             self.setItem(0, column, cell)
-
+            # 判断该项数据是否需要更新
             if setting["update"]:
+                # 用相关的字典保存相关数据
                 row_cells[header] = cell
-
+        # self.data_key='vt_symbol'
         if self.data_key:
             key = data.__getattribute__(self.data_key)
+            # 返回品种和相对应得数据，字典嵌套字典
             self.cells[key] = row_cells
 
     def update_old_row(self, data):
         """
         Update an old row in table.
         """
+        # 获取self.data_key对应的相关数据
         key = data.__getattribute__(self.data_key)
+        # 读取已经存在的字典
         row_cells = self.cells[key]
-
+        # 遍历整个字典的值，并更新相关的value
         for header, cell in row_cells.items():
             content = data.__getattribute__(header)
             cell.set_content(content, data)
@@ -309,6 +332,9 @@ class BaseMonitor(QtWidgets.QTableWidget):
         """
         Save table data into a csv file
         """
+        # 这个是怎么实现保存数据的呢
+        # 第二个参数是打开的窗口标题，三个参数是地址，第四个是文件类型
+        # 这个应该需要我们自己添加地址才能够保存数据
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, "保存数据", "", "CSV(*.csv)")
 
@@ -317,9 +343,9 @@ class BaseMonitor(QtWidgets.QTableWidget):
 
         with open(path, "w") as f:
             writer = csv.writer(f, lineterminator="\n")
-
+            # 把self.headers.keys作为列标题写入csv中
             writer.writerow(self.headers.keys())
-
+            # 先按照行，后按列写入csv中
             for row in range(self.rowCount()):
                 row_data = []
                 for column in range(self.columnCount()):
@@ -592,14 +618,18 @@ class TradingWidget(QtWidgets.QWidget):
 
     def init_ui(self):
         """"""
+        # 设置固定宽度
         self.setFixedWidth(300)
 
         # Trading function area
+        # 把交易所的名称设置到下拉列表中
         exchanges = self.main_engine.get_all_exchanges()
         self.exchange_combo = QtWidgets.QComboBox()
-        self.exchange_combo.addItems([exchange.value for exchange in exchanges])
+        self.exchange_combo.addItems(
+            [exchange.value for exchange in exchanges])
 
         self.symbol_line = QtWidgets.QLineEdit()
+        # 按回车键能够订阅到需要的信息
         self.symbol_line.returnPressed.connect(self.set_vt_symbol)
 
         self.name_line = QtWidgets.QLineEdit()
@@ -619,7 +649,7 @@ class TradingWidget(QtWidgets.QWidget):
         # 设置有效输入范围
         double_validator = QtGui.QDoubleValidator()
         double_validator.setBottom(0)
-
+        # 有效输入范围为数字
         self.price_line = QtWidgets.QLineEdit()
         self.price_line.setValidator(double_validator)
 
@@ -634,7 +664,7 @@ class TradingWidget(QtWidgets.QWidget):
 
         cancel_button = QtWidgets.QPushButton("全撤")
         cancel_button.clicked.connect(self.cancel_all)
-
+        # 向表单布局中添加元素
         form1 = QtWidgets.QFormLayout()
         form1.addRow("交易所", self.exchange_combo)
         form1.addRow("代码", self.symbol_line)
@@ -707,7 +737,7 @@ class TradingWidget(QtWidgets.QWidget):
         form2.addRow(self.bp4_label, self.bv4_label)
         form2.addRow(self.bp5_label, self.bv5_label)
 
-        # Overall layout
+        # Overall layout垂直布局
         vbox = QtWidgets.QVBoxLayout()
         vbox.addLayout(form1)
         vbox.addLayout(form2)
@@ -717,15 +747,19 @@ class TradingWidget(QtWidgets.QWidget):
         """
         Create label with certain font color.
         """
+        # 创建标签控件
         label = QtWidgets.QLabel()
         if color:
             label.setStyleSheet(f"color:{color}")
+        # 当使用几个QWidget，并且在其中添加一个固定大小的QLabel时，用函数setAlignment()，可以将这几个QLabel无缝拼接起来
         label.setAlignment(alignment)
         return label
 
     def register_event(self):
         """"""
+        # connect将系统消息绑定到消息处理函数。
         self.signal_tick.connect(self.process_tick_event)
+        # 收到消息，判断消息是否为tick，使用emit他才会发出去，然后connect让self.process_tick_event处理该消息
         self.event_engine.register(EVENT_TICK, self.signal_tick.emit)
 
     def process_tick_event(self, event: Event):
@@ -777,6 +811,7 @@ class TradingWidget(QtWidgets.QWidget):
         exchange_value = str(self.exchange_combo.currentText())
         vt_symbol = f"{symbol}.{exchange_value}"
 
+        # 如果为空或已经订阅过了，就直接返回
         if vt_symbol == self.vt_symbol:
             return
         self.vt_symbol = vt_symbol
@@ -1052,7 +1087,7 @@ class GlobalDialog(QtWidgets.QDialog):
         self.setMinimumWidth(800)
 
         settings = copy(SETTINGS)
-        用SETTING_FILENAME的文件更新settings数据
+        # 用SETTING_FILENAME的文件更新settings数据
         settings.update(load_json(SETTING_FILENAME))
 
         # Initialize line edits and form layout based on setting.

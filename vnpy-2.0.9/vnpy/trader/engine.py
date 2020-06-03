@@ -53,7 +53,7 @@ class MainEngine:
 
         self.gateways = {}  # 这个字典的key是借口名称，value是key对应的引擎
         self.engines = {}  # 传入的引擎
-        self.apps = {}
+        self.apps = {}  #相关功能的字典
         self.exchanges = []  # 交易所
 
         os.chdir(TRADER_DIR)    # Change working directory
@@ -100,9 +100,11 @@ class MainEngine:
     def add_app(self, app_class: Type[BaseApp]):
         """
         Add app.
-        添加上层应用
+        添加相关功能
         """
+        # 没有看到这个功能在哪个地方被用到
         app = app_class()
+        # app_name="CtaStrategy"或"CtaBacktester"，目前就这两个
         self.apps[app.app_name] = app
 
         engine = self.add_engine(app.engine_class)

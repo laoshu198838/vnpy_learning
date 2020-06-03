@@ -6,7 +6,7 @@ from .engine import BacktesterEngine, APP_NAME
 
 
 class CtaBacktesterApp(BaseApp):
-    """"""
+    """实盘的功能区"""
 
     app_name = APP_NAME
     app_module = __module__
